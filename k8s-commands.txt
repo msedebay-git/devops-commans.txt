@@ -1,0 +1,185 @@
+KUBERNETES
+
+sudo su
+apt-get update
+apt-get install docker.io
+sudo apt-get update && sudo apt-get install -y apt-transport-https curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add –
+
+cat <<EOF | sudo tee /etc/apt/sources.list.d/kubernetes.list
+deb https://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+
+now to INTIALIZE**
+
+kubeadm init --apiserver-advertise-address=private ip of master --pod-network-cidr=192.168.0.0/16
+
+kubeadm init --apiserver-advertise-address=private ip of master --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=NumCPU
+
+exit
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+check for nodes:
+
+kubectl get nodes
+kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+kubectl get nodes
+kubectl get pods -o wide --all-namespaces
+clear
+ls
+
+sudo nano 1.yaml
+
+1.YAML FILE
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apache2-deployment
+  labels:
+    app: apache2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: apache2
+  template:
+   metadata:
+     labels:
+       app: apache2
+   spec:
+     containers:
+      - name: apache2
+        image: httpd
+        ports:
+        - containerPort: 80
+
+kubectl get po
+kubectl get po -o wide
+kubectl expose deployment apache2-deployment --type NodePort --name apache2
+kubectl get po -o wide
+
+sudo git clone https://github.com/hshar/website.git
+kubectl get svc
+clear
+ls
+cd website
+ls
+sudo nano Dockerfile
+sudo docker build . –t kritika1231/demo
+sudo docker images
+sudo docker login 
+sudo docker push kritika1231/demo
+ls
+cd
+ls
+sudo cp 1.yaml 2.yaml
+sudo nano 2.yaml
+kubectl create –f 2.yaml
+***file**(instead of httpd->kritika1231/)
+kubectl get po
+kubectl get po –o wide
+curl ip
+kubectl expose deployment custom-deployment  --type NodePort –name custom
+kubectl get svc
+
+
+INGRESS INSTALLATION 
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/baremetal/deploy.yaml
+
+kubectl get svc --all-namespaces
+clear
+kubectl get svc
+sudo nano ingress.yaml
+
+ingress file:
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /apache2
+        backend: 
+          serviceName: apache2
+          servicePort: 80
+      - path: /custom
+        backend: 
+          serviceName: custom
+          servicePort: 80
+
+          
+ls
+kubectl edit svc apache2
+kubectl edit svc custom
+kubectl create -f ingress.yaml
+clear
+kubectl get svc
+kubectl get svc --all-namespaces
+kubectl get svc --all-namespaces –o wide
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+On master:
+    1  sudo su
+    2  mkdir -p $HOME/.kube
+    3  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    4  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    5  kubectl get nodes
+    6  kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+    7  kubectl get nodes
+    8  kubectl get pods -o wide --all-namespaces
+    9  clear
+   10  ls
+   11  sudo nano 1.yaml
+   12  kubectl create -f 1.yaml
+   13  kubectl get po
+   14  kubectl get po -o wide
+   15  curl  192.168.8.68
+   16  kubectl expose deployment apache2-deployment --type NodePort --name apache2
+   17  kubectl get po -o wide
+   18  kubectl get svc
+   19  sudo git clone "https://github.com/hshar/website.git"
+   20  ls
+   21  cd website
+   22  ls
+   23  sudo nano Dockerfile
+   24  sudo docker build . -t kritika1231/demo2
+   25  sudo docker images
+   26  sudo docker login
+   27  sudo docker push kritika1231/demo2
+   28  cd
+   29  ls
+   30  sudo cp 1.yaml 2.yaml
+   31  ls
+   32  sudo nano 2.yaml
+   33  kubectl create -f 2.yaml
+   34  kubectl get po
+   35  kubectl get po -o wide
+   36  curl 192.168.8.71
+   37  kubectl expose deployment custom-deployment --type NodePort --name custom
+   38  kubectl get svc
+   39  kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/baremetal/deploy.yaml
+   40  kubectl get svc --all-namespaces
+   41  sudo nano ingress.yaml
+   42  kubectl edit svc apache
+   43  kubectl edit svc apache2
+   44  kubectl edit svc custom
+   45  sudo nano ingress.yaml
+   46  kubectl create -f ingress.yaml
+   47  kubectl get svc --all-namespaces
+   48  kubectl get svc --all-namespaces -o wide
+   49  history
+
